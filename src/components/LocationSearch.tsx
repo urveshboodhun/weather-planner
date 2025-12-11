@@ -1,43 +1,54 @@
 import { useState } from "react";
 
-export default function LocationSearch({ onLocation }) {
+export default function LocationSearch({
+  onLocation,
+}: {
+  onLocation: (lat: number, lon: number, name: string) => void;
+}) {
   const [query, setQuery] = useState("");
 
   const searchLocation = async () => {
     if (!query.trim()) return;
 
-    const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=10&language=en&format=json`
-    );
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+      query
+    )}&count=10&language=en&format=json`;
+
+    const res = await fetch(url);
     const data = await res.json();
 
-    if (data.results && data.results.length > 0) {
-      const best = data.results.find((x) => x.country_code === "CA" && x?.admin1 === "British Columbia") || data.results[0];
-      onLocation(best.latitude, best.longitude, best.name);
-    } else {
+    if (!data.results || data.results.length === 0) {
       alert("Location not found.");
+      return;
     }
+
+    // Prefer Canadian results when searching Vancouver
+    const best =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data.results.find((x: any) => x.country_code === "CA") ||
+      data.results[0];
+
+    onLocation(best.latitude, best.longitude, best.name);
   };
 
   return (
-    <div className="bg-white shadow-md rounded-xl p-4 max-w-xl mx-auto">
-      <div className="flex gap-2 items-center">
-        <input
-          type="text"
-          placeholder="Search city…"
-          className="border border-gray-300 p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button
-          onClick={searchLocation}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg transition-all"
-        >
-          Search
-        </button>
-      </div>
+    <div className="flex gap-2 items-center w-full max-w-md mx-auto">
+      <input
+        type="text"
+        placeholder="Enter city…"
+        className="border p-2 rounded w-full"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <button
+        onClick={searchLocation}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        Search
+      </button>
     </div>
   );
 }
+
 
 

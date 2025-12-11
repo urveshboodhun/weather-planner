@@ -3,33 +3,29 @@ import LocationSearch from "./components/LocationSearch";
 import WeatherFetcher from "./components/WeatherFetcher";
 
 export default function App() {
-  const [coords, setCoords] = useState<{lat: number; lon: number; name: string} | null>(null);
+  const [coords, setCoords] = useState<{
+    lat: number;
+    lon: number;
+    name: string;
+  } | null>(null);
+
+  const handleLocationSelect = (lat: number, lon: number, name: string) => {
+    setCoords({ lat, lon, name });
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-200 p-6">
-      <div className="max-w-xl mx-auto text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 drop-shadow">
-          BC Adventure Weather Planner
-        </h1>
-        <p className="text-gray-700 mt-1">
-          Search any BC city to get live conditions.
-        </p>
-      </div>
+    <div className="p-6 max-w-xl mx-auto space-y-6">
+      <h1 className="text-3xl font-bold text-center">Weather Planner</h1>
 
-      <LocationSearch 
-        onLocation={(lat, lon, name) => setCoords({ lat, lon, name })}
-      />
+      <LocationSearch onLocation={handleLocationSelect} />
 
       {coords && (
-        <WeatherFetcher 
-          lat={coords.lat}
-          lon={coords.lon}
-          locationName={coords.name}
-        />
+        <WeatherFetcher lat={coords.lat} lon={coords.lon} name={coords.name} />
       )}
     </div>
   );
 }
+
 
 
 
